@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>刘毅 & 张凯静 · 婚礼邀请函</title>
+
+<!-- ============ 编辑说明（正式发布时可删除整段注释）============
+  【新人必看 · 全局可编辑区】
+  1. 基本信息：搜索下方 JS 中的 CONFIG 对象，改 nameGroom/nameBride/date 等
+  2. 地点：搜索 CONFIG.venue / CONFIG.address
+  3. 地图：搜索 CONFIG.map.lng / lat，换成你酒店的真实经纬度
+           再搜索 amapKey，换成你在高德开放平台申请的免费 Key
+           （不填 Key 也不影响，地图区会显示位置卡+一键导航）
+  4. 婚纱照：搜索 PHOTOS 数组，把 URL 换成你的照片链接
+  5. 寄语：搜索 新人寄语 区块的 <p> 文字
+  6. 回执：RSVP 数据保存在浏览器本地，仅本人可见，便于预览效果；
+           正式收集亲友回复需接后端/表单服务（见文件底部说明）
+  ================================================================ -->
+
+<style>
+  :root{
+    --pink:#f8c8dc; --pink-d:#f0a3c0; --pink-d2:#e07fa6;
+    --gold:#c9a86a; --gold-l:#e8d5a8; --ink:#5a4a52;
+    --bg:#fff6f9; --paper:#fff;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei","WenQuanYi Micro Hei",sans-serif;
+    background:var(--bg); color:var(--ink);
+    line-height:1.7; overflow-x:hidden;
+  }
+  img{max-width:100%;display:block;}
+
+  /* ===== 通用 ===== */
+  .section{padding:60px 20px;position:relative;}
+  .wrap{max-width:640px;margin:0 auto;}
+  .tag{
+    display:inline-block;font-size:13px;letter-spacing:4px;
+    color:var(--pink-d2);border-bottom:1px solid var(--gold);
+    padding-bottom:6px;margin-bottom:26px;
+  }
+  .gold{color:var(--gold);}
+
+  /* ===== 封面 ===== */
+  .cover{
+    min-height:100vh;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;
+    background:radial-gradient(circle at 50% 30%,#fff 0%,#ffe3ee 55%,#fbd3e6 100%);
+    padding:40px 24px;position:relative;overflow:hidden;
+  }
+  .cover::before,.cover::after{
+    content:"";position:absolute;width:320px;height:320px;border-radius:50%;
+    border:1px solid rgba(224,127,166,.25);
+  }
+  .cover::before{top:-120px;left:-120px;}
+  .cover::after{bottom:-120px;right:-120px;}
+  .ring{
+    font-size:15px;letter-spacing:8px;color:var(--pink-d2);
+    margin-bottom:26px;animation:fadeUp 1.2s ease both;
+  }
+  .cover-names{
+    font-family:"STKaiti","KaiTi",serif;font-size:52px;font-weight:700;
+    color:var(--pink-d2);letter-spacing:2px;line-height:1.3;
+    text-shadow:0 2px 18px rgba(224,127,166,.3);
+    animation:fadeUp 1.2s .2s ease both;
+  }
+  .cover-names .and{
+    font-size:26px;color:var(--gold);font-style:italic;
+    font-family:Georgia,serif;margin:0 14px;vertical-align:middle;
+  }
+  .cover-date{
+    margin-top:22px;font-size:20px;letter-spacing:3px;color:var(--ink);
+    animation:fadeUp 1.2s .4s ease both;
+  }
+  .cover-date small{display:block;font-size:13px;letter-spacing:5px;color:var(--pink-d2);margin-top:8px;}
+  .scroll-hint{
+    position:absolute;bottom:26px;left:50%;transform:translateX(-50%);
+    font-size:12px;letter-spacing:3px;color:var(--pink-d2);
+    animation:bob 1.8s infinite;
+  }
+  @keyframes fadeUp{from{opacity:0;transform:translateY(26px);}to{opacity:1;transform:none;}}
+  @keyframes bob{0%,100%{opacity:.5;transform:translate(-50%,0);}50%{opacity:1;transform:translate(-50%,8px);}}
+
+  /* ===== 倒计时 ===== */
+  .countdown{background:linear-gradient(135deg,#fbe4ee,#fff);text-align:center;}
+  .cd-box{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;}
+  .cd-item{
+    background:var(--paper);border-radius:16px;min-width:76px;padding:16px 10px;
+    box-shadow:0 6px 24px rgba(224,127,166,.18);
+  }
+  .cd-num{font-size:34px;font-weight:700;color:var(--pink-d2);font-family:Georgia,serif;}
+  .cd-lab{font-size:12px;letter-spacing:2px;color:var(--gold);margin-top:2px;}
+
+  /* ===== 相册 ===== */
+  .photos{background:var(--paper);}
+  .frame{
+    position:relative;border-radius:20px;overflow:hidden;
+    box-shadow:0 14px 40px rgba(224,127,166,.28);
+    aspect-ratio:4/5;background:#f4dbe6;
+  }
+  .frame img{
+    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    opacity:0;transition:opacity 1s ease;
+  }
+  .frame img.on{opacity:1;}
+  .frame .dots{position:absolute;bottom:14px;left:0;right:0;text-align:center;}
+  .frame .dots i{
+    display:inline-block;width:8px;height:8px;border-radius:50%;
+    background:rgba(255,255,255,.55);margin:0 4px;cursor:pointer;
+  }
+  .frame .dots i.on{background:var(--gold);transform:scale(1.3);}
+
+  /* ===== 信息卡 ===== */
+  .info{background:linear-gradient(180deg,#fff,#fff6f9);}
+  .card{
+    background:var(--paper);border-radius:22px;padding:34px 26px;
+    box-shadow:0 12px 36px rgba(224,127,166,.2);
+    border:1px solid rgba(233,178,201,.3);
+  }
+  .row{display:flex;align-items:flex-start;padding:16px 0;border-bottom:1px dashed #f0d7e2;}
+  .row:last-child{border-bottom:none;}
+  .row .ic{
+    width:44px;height:44px;flex:0 0 44px;border-radius:50%;
+    background:linear-gradient(135deg,var(--pink),var(--pink-d2));
+    color:#fff;display:flex;align-items:center;justify-content:center;
+    font-size:20px;margin-right:16px;
+  }
+  .row .tt{font-size:12px;letter-spacing:2px;color:var(--pink-d2);}
+  .row .vv{font-size:17px;font-weight:600;margin-top:2px;}
+  /* 地址统一样式 */
+  .row .addr{font-size:17px;font-weight:600;margin-top:2px;}
+
+  /* ===== 地图 ===== */
+  .map{background:var(--paper);}
+  #map{height:300px;border-radius:20px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.08);}
+  .map-fallback{display:none;text-align:center;padding:40px 20px;background:#fbe9f1;border-radius:20px;}
+  .map-fallback .big{font-size:40px;}
+  .map-fallback h4{color:var(--pink-d2);margin:12px 0 6px;}
+  .nav-btn{
+    display:inline-block;margin-top:14px;background:var(--pink-d2);color:#fff;
+    text-decoration:none;padding:10px 26px;border-radius:30px;font-size:14px;
+  }
+
+  /* ===== 寄语 ===== */
+  .wish{background:radial-gradient(circle at 50% 50%,#fff 0%,#ffe9f2 100%);text-align:center;}
+  .wish p{font-size:16px;color:var(--ink);max-width:520px;margin:0 auto 14px;font-style:italic;}
+  .wish .sign{font-size:14px;letter-spacing:3px;color:var(--pink-d2);margin-top:20px;}
+
+  /* ===== RSVP 回执 ===== */
+  .rsvp{background:linear-gradient(135deg,#fff6f9,#fbe4ee);}
+  .rsvp-box{background:var(--paper);border-radius:22px;padding:30px 24px;box-shadow:0 12px 36px rgba(224,127,166,.2);}
+  .rsvp-tabs{display:flex;gap:10px;margin-bottom:22px;}
+  .rsvp-tabs button{
+    flex:1;border:1px solid var(--pink-d);background:#fff;color:var(--pink-d2);
+    padding:12px;border-radius:14px;font-size:15px;cursor:pointer;transition:.2s;
+  }
+  .rsvp-tabs button.active{background:var(--pink-d2);color:#fff;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:13px;letter-spacing:1px;color:var(--pink-d2);margin-bottom:6px;}
+  .field input,.field select,.field textarea{
+    width:100%;border:1px solid #f0d3e0;border-radius:12px;padding:11px 13px;
+    font-size:15px;font-family:inherit;background:#fffdfe;color:var(--ink);
+  }
+  .field textarea{resize:vertical;min-height:70px;}
+  .field input:focus,.field select:focus,.field textarea:focus{
+    outline:none;border-color:var(--pink-d2);
+  }
+  .num-ctrl{display:flex;align-items:center;gap:14px;}
+  .num-ctrl button{
+    width:40px;height:40px;border-radius:50%;border:1px solid var(--pink-d);
+    background:#fff;color:var(--pink-d2);font-size:22px;line-height:1;cursor:pointer;
+  }
+  .num-ctrl span{min-width:40px;text-align:center;font-size:20px;font-weight:700;color:var(--pink-d2);}
+  .submit-btn{
+    width:100%;border:none;background:linear-gradient(135deg,var(--pink-d2),var(--pink-d));
+    color:#fff;font-size:17px;padding:14px;border-radius:30px;cursor:pointer;letter-spacing:2px;
+    box-shadow:0 8px 22px rgba(224,127,166,.45);transition:.2s;
+  }
+  .submit-btn:active{transform:scale(.98);}
+  .result-msg{
+    display:none;margin-top:18px;text-align:center;padding:16px;border-radius:14px;
+    background:#f0f9f1;color:#4a9a5e;font-size:15px;
+  }
+  .list-box{margin-top:22px;border-top:1px dashed #f0d3e0;padding-top:18px;}
+  .list-box h4{font-size:14px;letter-spacing:2px;color:var(--gold);margin-bottom:12px;}
+  .guest-item{
+    background:#fffdfe;border:1px solid #f3dce5;border-radius:12px;padding:12px 14px;margin-bottom:10px;
+    font-size:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;
+  }
+  .guest-item .who{font-weight:600;color:var(--pink-d2);}
+  .guest-item .meta{color:#999;font-size:12px;}
+  .guest-item .del{background:none;border:none;color:#d99;cursor:pointer;font-size:18px;line-height:1;}
+  .empty{color:#c9b3bd;font-size:13px;text-align:center;padding:14px;}
+
+  /* ===== 页脚 ===== */
+  footer{background:var(--pink-d2);color:#fff;text-align:center;padding:40px 20px;}
+  footer .fh{font-family:"STKaiti","KaiTi",serif;font-size:28px;margin-bottom:8px;}
+  footer .fs{font-size:12px;letter-spacing:3px;opacity:.85;}
+  .tip{
+    max-width:640px;margin:30px auto 0;font-size:12px;color:#b9a8b0;
+    text-align:center;padding:0 20px 30px;line-height:1.9;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ 封面 ============ -->
+<section class="cover">
+  <div class="ring">WEDDING INVITATION</div>
+  <div class="cover-names">
+    <span id="cvGroom">刘毅</span><span class="and">&amp;</span><span id="cvBride">张凯静</span>
+  </div>
+  <div class="cover-date" id="cvDateLine">
+    <span id="cvDate">2027年1月1日</span>
+    <small>农历冬月廿三 · 星期五 · 谨于当日 11:58 举行婚礼</small>
+  </div>
+  <div class="scroll-hint">↓ 向下滑动开启喜帖 ↓</div>
+</section>
+
+<!-- ============ 倒计时 ============ -->
+<section class="section countdown">
+  <div class="wrap">
+    <div class="tag">距 离 我 们 的 婚 礼 还 有</div>
+    <div class="cd-box" id="cd">
+      <div class="cd-item"><div class="cd-num" id="cdD">--</div><div class="cd-lab">天</div></div>
+      <div class="cd-item"><div class="cd-num" id="cdH">--</div><div class="cd-lab">时</div></div>
+      <div class="cd-item"><div class="cd-num" id="cdM">--</div><div class="cd-lab">分</div></div>
+      <div class="cd-item"><div class="cd-num" id="cdS">--</div><div class="cd-lab">秒</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 婚纱照 ============ -->
+<section class="section photos">
+  <div class="wrap">
+    <div style="text-align:center"><span class="tag">我 们 的 婚 纱 照</span></div>
+    <div class="frame" id="frame">
+      <!-- 图片由 JS 注入 -->
+      <div class="dots" id="dots"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 信息卡 ============ -->
+<section class="section info">
+  <div class="wrap">
+    <div style="text-align:center"><span class="tag">婚 礼 详 情</span></div>
+    <div class="card">
+      <div class="row">
+        <div class="ic">♥</div>
+        <div><div class="tt">新 郎 &amp; 新 娘</div><div class="vv" id="inCouple">刘毅 &amp; 张凯静</div></div>
+      </div>
+      <div class="row">
+        <div class="ic">🕐</div>
+        <div><div class="tt">良 辰 吉 时</div><div class="vv" id="inTime">2027年1月1日（周五）11:58 举行仪式</div></div>
+      </div>
+      <div class="row">
+        <div class="ic">📍</div>
+        <div><div class="tt">喜 宴 地 点</div><div class="addr" id="inVenue">宸臻酒店 一楼 法式厅</div></div>
+      </div>
+      <div class="row">
+        <div class="ic">🚇</div>
+        <div><div class="tt">交 通 指 引</div><div class="addr" id="inAddr">山西省吕梁市临县临泉镇 宸臻酒店 一楼法式厅</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 地图 ============ -->
+<section class="section map">
+  <div class="wrap">
+    <div style="text-align:center"><span class="tag">位 置 导 航</span></div>
+    <div id="map"></div>
+    <div class="map-fallback" id="mapFallback">
+      <div class="big">📍</div>
+      <h4 id="fbVenue">临县临泉镇 · 宸臻酒店 1F 法式厅</h4>
+      <p id="fbAddr" style="color:#8a7a82;font-size:14px">山西省吕梁市临县临泉镇 宸臻酒店 一楼法式厅</p>
+      <a class="nav-btn" id="navBtn" href="#">一键导航</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 寄语 ============ -->
+<section class="section wish">
+  <div class="wrap">
+    <span class="tag">新 人 寄 语</span>
+    <p>从这一刻起，我们把名字并排写进同一本人生。</p>
+    <p>愿以此生为期，三餐四季，朝朝暮暮，都与你共度。</p>
+    <p>诚邀您见证我们的幸福，分享这一刻的喜悦。</p>
+    <div class="sign" id="signLine">—— 刘毅 &amp; 张凯静 敬邀 ——</div>
+  </div>
+</section>
+
+<!-- ============ RSVP 回执 ============ -->
+<section class="section rsvp" id="rsvp">
+  <div class="wrap">
+    <div style="text-align:center"><span class="tag">出 席 回 执 · RSVP</span></div>
+    <div class="rsvp-box">
+      <div class="rsvp-tabs">
+        <button class="active" data-attend="yes">✓ 我 会 出 席</button>
+        <button data-attend="no">✕ 无 法 前 往</button>
+      </div>
+
+      <div class="field">
+        <label>您的姓名 *</label>
+        <input id="fName" placeholder="请填写姓名，方便我们安排席位">
+      </div>
+
+      <div class="field">
+        <label>出席人数</label>
+        <div class="num-ctrl">
+          <button id="numMinus">−</button>
+          <span id="fNum">1</span>
+          <button id="numPlus">+</button>
+          <span style="font-size:12px;color:#b0a0a8;margin-left:6px">含您本人在内</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>祝福留言（选填）</label>
+        <textarea id="fMsg" placeholder="写下您对我们的祝福吧~"></textarea>
+      </div>
+
+      <button class="submit-btn" id="submitBtn">提交回执</button>
+      <div class="result-msg" id="resultMsg"></div>
+
+      <div class="list-box">
+        <h4>已收到的回执（<span id="cnt">0</span>）</h4>
+        <div id="guestList"><div class="empty">暂无回执，快来第一个祝福我们吧</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="fh">刘毅 <span class="gold">&amp;</span> 张凯静</div>
+  <div class="fs">THANK YOU FOR BEING PART OF OUR STORY</div>
+</footer>
+
+<div class="tip">
+  💡 本页为可编辑模板：用记事本/VS Code 打开此文件，搜索「新人必看」注释，按说明替换姓名、日期、地点、照片即可。<br>
+  RSVP 回执默认保存在本机浏览器（仅预览用）；正式收集亲友回复需接入后端或表单服务，详见文件底部注释。
+</div>
+
+<script>
+/* ============================================================
+   编辑区 CONFIG —— 改这里即可，其余不用动
+   ============================================================ */
+window._AMapSecurityConfig = {
+  securityJsCode: "f5d7dec17099e09f13009c769f43f24c"
+};
+var CONFIG = {
+  groom   : "刘毅",
+  bride   : "张凯静",
+  dateText: "2027年1月1日",           // 显示用
+  dateISO : "2027-01-01T11:58:00",    // 倒计时目标，格式 YYYY-MM-DDTHH:mm:ss
+  lunar   : "农历冬月廿三 · 星期五 · 谨于当日 11:58 举行婚礼",
+  venue   : "宸臻酒店 一楼法式厅",
+  address : "山西省吕梁市临县临泉镇 宸臻酒店 一楼法式厅",
+  // 地图经纬度（百度/高德 GCJ-02 坐标）
+  map: { lng: 110.992178, lat: 37.954896, zoom: 15 },
+  // 高德地图 Key：到 https://lbs.amap.com/ 免费申请，填到下面引号内
+  amapKey: "e4ee398fd9fc9a3a53628abf3ba24318"
+};
+
+// 婚纱照：把 URL 换成你的真实照片链接
+var PHOTOS = [
+  "https://picsum.photos/seed/love1/800/1000",
+  "https://picsum.photos/seed/love2/800/1000",
+  "https://picsum.photos/seed/love3/800/1000",
+  "https://picsum.photos/seed/love4/800/1000"
+];
+/* ============================================================ */
+
+/* ---- 填充基础信息 ---- */
+function fill(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+fill("cvGroom",CONFIG.groom); fill("cvBride",CONFIG.bride);
+fill("cvDate",CONFIG.dateText); fill("inCouple",CONFIG.groom+" & "+CONFIG.bride);
+fill("inTime",CONFIG.dateText+"（周五）11:58 举行仪式");
+fill("inVenue",CONFIG.venue); fill("inAddr",CONFIG.address);
+fill("fbVenue",CONFIG.venue); fill("fbAddr",CONFIG.address);
+fill("signLine","—— "+CONFIG.groom+" & "+CONFIG.bride+" 敬邀 ——");
+document.title = CONFIG.groom+" & "+CONFIG.bride+" · 婚礼邀请函";
+
+/* ---- 倒计时 ---- */
+var target = new Date(CONFIG.dateISO).getTime();
+function tick(){
+  var d = target - Date.now();
+  if(d < 0) d = 0;
+  document.getElementById("cdD").textContent = Math.floor(d/864e5);
+  document.getElementById("cdH").textContent = Math.floor(d/36e5)%24;
+  document.getElementById("cdM").textContent = Math.floor(d/6e4)%60;
+  document.getElementById("cdS").textContent = Math.floor(d/1e3)%60;
+}
+tick(); setInterval(tick,1000);
+
+/* ---- 相册轮播 ---- */
+var frame = document.getElementById("frame");
+var dotsEl = document.getElementById("dots");
+var idx = 0;
+PHOTOS.forEach(function(src,i){
+  var img = document.createElement("img");
+  img.src = src; img.alt = "婚纱照"+(i+1);
+  if(i===0) img.className="on";
+  frame.insertBefore(img,dotsEl);
+  var dot = document.createElement("i");
+  if(i===0) dot.className="on";
+  dot.onclick = function(){go(i);};
+  dotsEl.appendChild(dot);
+});
+var imgs = frame.querySelectorAll("img"), dots = dotsEl.querySelectorAll("i");
+function go(i){idx=i;imgs.forEach(function(x,n){x.classList.toggle("on",n===i);});dots.forEach(function(x,n){x.classList.toggle("on",n===i);});}
+setInterval(function(){go((idx+1)%PHOTOS.length);},3500);
+
+/* ---- 地图 ---- */
+(function mapInit(){
+  var fb = document.getElementById("mapFallback");
+  var mapEl = document.getElementById("map");
+  var name = CONFIG.venue;
+  var addr = CONFIG.address;
+  var m = CONFIG.map;
+  var scheme = "https://uri.amap.com/marker?position="+m.lng+","+m.lat+"&name="+encodeURIComponent(name)+"&src=wedding&coordinate=gaode&callnative=1";
+  document.getElementById("navBtn").href = scheme;
+
+  if(CONFIG.amapKey && CONFIG.amapKey !== "YOUR_AMAP_KEY"){
+    var s = document.createElement("script");
+    s.src = "https://webapi.amap.com/maps?v=2.0&key="+CONFIG.amapKey;
+    s.onload = function(){
+      try{
+        var map = new AMap.Map("map",{zoom:m.zoom,center:[m.lng,m.lat]});
+        var mk = new AMap.Marker({position:[m.lng,m.lat]});
+        map.add(mk);
+        var info = new AMap.InfoWindow({
+          content:'<div style="padding:8px 6px;font-size:13px;line-height:1.7"><b style="color:#e07fa6">'+name+
+                  '</b><br><span style="color:#888;font-size:12px">'+addr+'</span></div>',
+          offset:new AMap.Pixel(0,-32)
+        });
+        info.open(map,[m.lng,m.lat]);
+      }catch(e){ fb.style.display="block"; mapEl.style.display="none"; }
+    };
+    s.onerror = function(){ fb.style.display="block"; mapEl.style.display="none"; };
+    document.head.appendChild(s);
+  }else{
+    fb.style.display="block"; mapEl.style.display="none";
+  }
+})();
+
+/* ============================================================
+   RSVP 回执逻辑
+   - 默认 localStorage 本机保存（演示/预览用，无需服务器）
+   - 接入后端：把 submit() 里 fetch('/你的接口', ...) 的注释打开并填写即可
+   ============================================================ */
+var attend = "yes";
+var num = 1;
+
+document.querySelectorAll(".rsvp-tabs button").forEach(function(b){
+  b.onclick = function(){
+    document.querySelectorAll(".rsvp-tabs button").forEach(function(x){x.classList.remove("active");});
+    b.classList.add("active");
+    attend = b.dataset.attend;
+    document.getElementById("fNum").parentNode.style.display = attend==="yes" ? "flex" : "none";
+  };
+});
+
+document.getElementById("numPlus").onclick = function(){if(num<20){num++;document.getElementById("fNum").textContent=num;}};
+document.getElementById("numMinus").onclick = function(){if(num>1){num--;document.getElementById("fNum").textContent=num;}};
+
+var KEY = "wedding_rsvp_" + CONFIG.groom + CONFIG.bride;
+function loadList(){try{return JSON.parse(localStorage.getItem(KEY))||[];}catch(e){return[];}}
+function saveList(a){localStorage.setItem(KEY,JSON.stringify(a));}
+
+function render(){
+  var list = loadList();
+  document.getElementById("cnt").textContent = list.length;
+  var box = document.getElementById("guestList");
+  if(!list.length){box.innerHTML='<div class="empty">暂无回执，快来第一个祝福我们吧</div>';return;}
+  box.innerHTML = "";
+  list.slice().reverse().forEach(function(g,i){
+    var realIdx = list.length-1-i;
+    var div = document.createElement("div");
+    div.className="guest-item";
+    div.innerHTML =
+      '<div><span class="who">'+esc(g.name)+'</span> · '+
+      (g.attend==="yes"
+        ? '<span style="color:#4a9a5e">将出席 ×'+g.num+'人</span>'
+        : '<span style="color:#c98">无法出席</span>')+
+      '<div class="meta">'+(g.msg?esc(g.msg):"")+' · '+new Date(g.t).toLocaleString("zh-CN",{month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"})+'</div></div>'+
+      '<button class="del" data-i="'+realIdx+'" title="删除">×</button>';
+    box.appendChild(div);
+  });
+  box.querySelectorAll(".del").forEach(function(b){
+    b.onclick = function(){
+      var a=loadList(); a.splice(+b.dataset.i,1); saveList(a); render();
+    };
+  });
+}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+
+function submit(){
+  var name = document.getElementById("fName").value.trim();
+  var msg = document.getElementById("fMsg").value.trim();
+  var box = document.getElementById("resultMsg");
+
+  if(!name){ box.style.display="block"; box.style.background="#fdecec"; box.style.color="#c96";
+    box.textContent="请填写您的姓名，方便我们安排席位哦~"; return; }
+
+  var data = { name:name, attend:attend, num:num, msg:msg, t:Date.now() };
+
+  /* —— 接入后端示例（取消注释并填写地址即可）——
+  fetch("https://你的域名/api/rsvp",{
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(data)
+  }).then(function(r){return r.json();}).then(function(res){
+    if(res.ok) done(data); else boxErr(res.msg||"提交失败");
+  }).catch(function(){ boxErr("网络异常，请稍后重试"); });
+  return;
+  ------------------------------------------- */
+
+  done(data);
+
+  function done(g){
+    var a=loadList(); a.push(g); saveList(a); render();
+    box.style.display="block"; box.style.background="#f0f9f1"; box.style.color="#4a9a5e";
+    box.innerHTML = g.attend==="yes"
+      ? "🎉 回执已收到！"+esc(g.name)+"，我们已记下您这一桌，婚礼现场见~"
+      : "💌 已收到您的回执，虽不能到场，但您的祝福我们收到了，谢谢~";
+    document.getElementById("fName").value="";
+    document.getElementById("fMsg").value="";
+  }
+  function boxErr(t){box.style.display="block";box.style.background="#fdecec";box.style.color="#c96";box.textContent=t;}
+}
+document.getElementById("submitBtn").onclick = submit;
+
+render();
+</script>
+</body>
+</html>
